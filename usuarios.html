@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estudiante - Pronunciation App</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .tab { cursor: pointer; padding: 0.5rem 1rem; border: 1px solid #ccc; display: inline-block; margin-right: 5px; }
+    .tab.active { background-color: #eee; font-weight: bold; }
+    section.tab-content { display: none; margin-top: 1rem; }
+    section.tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎧 Plataforma de Pronunciación - Estudiante</h1>
+    <button onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <main>
+    <section id="alertBox"></section>
+
+    <!-- LOGIN Y REGISTRO -->
+    <section id="authSection">
+      <h2>Iniciar sesión o registrarse</h2>
+      <div class="auth-forms">
+        <div class="login">
+          <h3>Login</h3>
+          <input type="email" id="loginEmail" placeholder="Correo electrónico" />
+          <input type="password" id="loginPassword" placeholder="Contraseña" />
+          <button id="btnLogin">Entrar</button>
+        </div>
+        <div class="register">
+          <h3>Registro</h3>
+          <input type="text" id="registerUsername" placeholder="Nombre de usuario" />
+          <input type="email" id="registerEmail" placeholder="Correo electrónico" />
+          <input type="password" id="registerPassword" placeholder="Contraseña" />
+          <button id="btnRegister">Registrarse</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN PRINCIPAL -->
+    <section id="practiceSection" style="display:none;">
+      <!-- PESTAÑAS -->
+      <div>
+        <span class="tab active" data-target="practiceTab">Práctica</span>
+        <span class="tab" data-target="profileTab">Perfil</span>
+        <span class="tab" data-target="statsTab">Estadísticas</span>
+        <span class="tab" data-target="historyTab">Historial</span>
+      </div>
+
+      <!-- CONTENIDOS -->
+      <section id="practiceTab" class="tab-content active">
+        <h2>Práctica de pronunciación</h2>
+        <label for="temaSelect">Selecciona un tema:</label>
+        <select id="temaSelect">
+          <option value="Verb to be">Verb to be</option>
+          <option value="Present Simple">Present Simple</option>
+          <option value="The verb can">The verb can</option>
+          <option value="Future Perfect">Future Perfect</option>
+        </select>
+        <button id="btnGenerar">Generar oración</button>
+        <p id="fraseGenerada" class="frase"></p>
+
+        <div id="audioControls" style="display:none;">
+          <button id="btnGrabar">🎙️ Grabar</button>
+          <button id="btnDetener" disabled>⏹️ Detener</button>
+          <audio id="audioPreview" controls></audio>
+          <button id="btnEnviar" disabled>Enviar para análisis</button>
+        </div>
+
+        <div id="resultado" style="display:none;">
+          <h3>📊 Resultados</h3>
+          <p><strong>Transcripción:</strong> <span id="transcripcion"></span></p>
+          <p><strong>Puntaje:</strong> <span id="puntaje"></span>%</p>
+          <p><strong>Nivel:</strong> <span id="nivel"></span></p>
+          <p><strong>Feedback:</strong> <span id="feedback"></span></p>
+          <audio id="audioFinal" controls></audio>
+        </div>
+      </section>
+
+      <section id="profileTab" class="tab-content">
+        <h2>👤 Mi Perfil</h2>
+        <p><strong>Correo:</strong> <span id="profileEmail"></span></p>
+        <p>
+          <strong>Nombre de usuario:</strong>
+          <input type="text" id="profileUsername" />
+          <button id="btnUpdateProfile">Actualizar</button>
+        </p>
+      </section>
+
+      <section id="statsTab" class="tab-content">
+        <h2>📈 Mis Estadísticas</h2>
+        <p><strong>Puntaje promedio:</strong> <span id="avgScore">0</span>%</p>
+        <p><strong>Mejor puntaje:</strong> <span id="bestScore">0</span>%</p>
+        <p><strong>Peor puntaje:</strong> <span id="worstScore">0</span>%</p>
+      </section>
+
+      <section id="historyTab" class="tab-content">
+        <h2>🕓 Historial de Evaluaciones</h2>
+        <ul id="historyList"></ul>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    // === PESTAÑAS ===
+    const tabs = document.querySelectorAll(".tab");
+    const tabContents = document.querySelectorAll(".tab-content");
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        const target = tab.dataset.target;
+        tabContents.forEach(tc => tc.classList.remove("active"));
+        document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // === VARIABLES ===
+    const authSection = document.getElementById("authSection");
+    const practiceSection = document.getElementById("practiceSection");
+
+    const btnLogin = document.getElementById("btnLogin");
+    const btnRegister = document.getElementById("btnRegister");
+    const btnGenerar = document.getElementById("btnGenerar");
+    const btnGrabar = document.getElementById("btnGrabar");
+    const btnDetener = document.getElementById("btnDetener");
+    const btnEnviar = document.getElementById("btnEnviar");
+    const btnUpdateProfile = document.getElementById("btnUpdateProfile");
+
+    const profileEmail = document.getElementById("profileEmail");
+    const profileUsername = document.getElementById("profileUsername");
+
+    const avgScore = document.getElementById("avgScore");
+    const bestScore = document.getElementById("bestScore");
+    const worstScore = document.getElementById("worstScore");
+
+    const historyList = document.getElementById("historyList");
+
+    const temaSelect = document.getElementById("temaSelect");
+    const fraseGenerada = document.getElementById("fraseGenerada");
+
+    const audioPreview = document.getElementById("audioPreview");
+    const audioFinal = document.getElementById("audioFinal");
+
+    const resultadoDiv = document.getElementById("resultado");
+    const transcripcionSpan = document.getElementById("transcripcion");
+    const puntajeSpan = document.getElementById("puntaje");
+    const nivelSpan = document.getElementById("nivel");
+    const feedbackSpan = document.getElementById("feedback");
+
+    let oracionActual = "";
+    let audioBlob = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+    // =========================
+    // LOGIN Y REGISTRO
+    // =========================
+    btnLogin.onclick = async () => {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      if (!email || !password) return showAlert("Completa todos los campos", "error");
+
+      try {
+        await postData("/usuarios/login", { email, password });
+        showAlert("Login exitoso ✅", "success");
+        saveSession("usuario", email);
+        authSection.style.display = "none";
+        practiceSection.style.display = "block";
+        await cargarPerfilYEstadisticas(email);
+      } catch {
+        showAlert("Error al iniciar sesión", "error");
+      }
+    };
+
+    btnRegister.onclick = async () => {
+      const username = document.getElementById("registerUsername").value.trim();
+      const email = document.getElementById("registerEmail").value.trim();
+      const password = document.getElementById("registerPassword").value.trim();
+      if (!username || !email || !password) return showAlert("Completa todos los campos", "error");
+
+      try {
+        await postData("/usuarios/registro", { username, email, password });
+        showAlert("Usuario registrado ✅", "success");
+      } catch {
+        showAlert("Error al registrar usuario", "error");
+      }
+    };
+
+    // =========================
+    // PERFIL Y ESTADÍSTICAS
+    // =========================
+    async function cargarPerfilYEstadisticas(email) {
+      try {
+        const profile = await getData(`/usuarios/${email}`);
+        profileEmail.textContent = profile.email;
+        profileUsername.value = profile.username;
+
+        const stats = await getData(`/usuarios/${email}/estadisticas`);
+        avgScore.textContent = stats.promedio?.toFixed(2) || 0;
+        bestScore.textContent = stats.mejor_puntaje?.toFixed(2) || 0;
+        worstScore.textContent = stats.peor_puntaje?.toFixed(2) || 0;
+
+        const historial = await getData(`/usuarios/${email}/historial`);
+        historyList.innerHTML = "";
+        historial.forEach(item => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>Tema:</strong> ${item.tema} | <strong>Frase:</strong> ${item.frase} | <strong>Puntaje:</strong> ${item.puntaje.toFixed(2)}% | <strong>Feedback:</strong> ${item.feedback}` +
+                         (item.audio_url ? `<br/><audio controls src="${API_URL}${item.audio_url}"></audio>` : "");
+          historyList.appendChild(li);
+        });
+      } catch (e) {
+        console.error("Error al cargar perfil y estadísticas:", e);
+      }
+    }
+
+    btnUpdateProfile.onclick = async () => {
+      const { email } = getSession();
+      const newUsername = profileUsername.value.trim();
+      if (!newUsername) return showAlert("El nombre de usuario no puede estar vacío", "error");
+
+      try {
+        await putData(`/usuarios/${email}/perfil`, { username: newUsername });
+        showAlert("Perfil actualizado ✅", "success");
+        await cargarPerfilYEstadisticas(email);
+      } catch {
+        showAlert("Error al actualizar perfil", "error");
+      }
+    };
+
+    // =========================
+    // GENERAR ORACIÓN
+    // =========================
+    btnGenerar.onclick = async () => {
+      const tema = temaSelect.value;
+
+      // Limpiar el audio anterior
+      audioPreview.src = "";
+      audioPreview.style.display = "none";
+      // Limpiar los resultados previos
+      resultadoDiv.style.display = "none";
+
+      fraseGenerada.textContent = "Generando oración...";
+      try {
+        const data = await getData(`/generar_oracion/${encodeURIComponent(tema)}`);
+        oracionActual = data.frase;
+        fraseGenerada.textContent = oracionActual;
+        document.getElementById("audioControls").style.display = "block";
+        
+        // Habilitar el botón de enviar solo cuando se genere una nueva oración
+        btnEnviar.disabled = false;
+      } catch {
+        fraseGenerada.textContent = "Error al generar oración ❌";
+      }
+    };
+
+    // =========================
+    // GRABAR AUDIO
+    // =========================
+    btnGrabar.onclick = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+          audioPreview.src = URL.createObjectURL(audioBlob);
+          audioPreview.style.display = "block";  // Mostrar el audio grabado
+          btnEnviar.disabled = false;
+        };
+
+        mediaRecorder.start();
+        showAlert("Grabando... 🎙️", "info");
+        btnGrabar.disabled = true;
+        btnDetener.disabled = false;
+      } catch {
+        showAlert("Error al acceder al micrófono", "error");
+      }
+    };
+
+    btnDetener.onclick = () => {
+      mediaRecorder.stop();
+      btnGrabar.disabled = false;
+      btnDetener.disabled = true;
+      showAlert("Grabación detenida ⏹️", "info");
+    };
+
+    // =========================
+    // ENVIAR AUDIO PARA ANÁLISIS
+    // =========================
+    btnEnviar.onclick = async () => {
+      if (!audioBlob || !oracionActual) return showAlert("No hay audio u oración", "error");
+      const { email } = getSession();
+      const tema = temaSelect.value;
+
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "voz.wav");
+      formData.append("frase", oracionActual);
+      formData.append("usuario_email", email);
+      formData.append("tema", tema);
+
+      try {
+        const data = await postFile("/analizar_pronunciacion_audio/", formData);
+        transcripcionSpan.textContent = data.transcripcion;
+        puntajeSpan.textContent = data.porcentaje.toFixed(2);
+        nivelSpan.textContent = data.nivel;
+        feedbackSpan.textContent = data.feedback;
+        resultadoDiv.style.display = "block";
+        if (data.audio_url) audioFinal.src = `${API_URL}${data.audio_url}`;
+        showAlert("Análisis completado ✅", "success");
+        await cargarPerfilYEstadisticas(email);
+        
+        // Deshabilitar el botón de "Enviar" después de analizar
+        btnEnviar.disabled = true;
+      } catch {
+        showAlert("Error al analizar pronunciación", "error");
+      }
+    };
+  </script>
+</body>
+</html>

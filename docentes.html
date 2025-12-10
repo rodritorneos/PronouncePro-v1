@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docente - Pronunciation App</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>👩‍🏫 Panel del Docente</h1>
+    <button onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <main>
+    <section id="alertBox"></section>
+
+    <!-- =================== LOGIN Y REGISTRO =================== -->
+    <section id="authSection">
+      <h2>Acceso de docentes</h2>
+      <div class="auth-forms">
+        <div class="login">
+          <h3>Login</h3>
+          <input type="email" id="loginEmail" placeholder="Correo electrónico" />
+          <input type="password" id="loginPassword" placeholder="Contraseña" />
+          <button id="btnLoginDocente">Entrar</button>
+        </div>
+
+        <div class="register">
+          <h3>Registro</h3>
+          <input type="text" id="registerNombre" placeholder="Nombre de usuario" />
+          <input type="email" id="registerEmail" placeholder="Correo electrónico" />
+          <input type="password" id="registerPassword" placeholder="Contraseña" />
+          <button id="btnRegisterDocente">Registrarse</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== PANEL PRINCIPAL =================== -->
+    <section id="panelSection" style="display:none;">
+      <h2>Estudiantes y prácticas</h2>
+
+      <div class="filtros" style="margin-bottom:12px;">
+        <button id="btnCargarUsuarios" class="button">📋 Ver estudiantes</button>
+        <button id="btnCargarPracticas" class="button secondary">🎧 Ver prácticas</button>
+        <button id="btnTop5" class="button accent">🏆 Top 5 Estudiantes</button>
+      </div>
+
+      <!-- 🔍 Búsqueda de estudiante -->
+      <div id="busquedaEstudiante" style="margin-bottom: 12px;">
+        <input type="text" id="inputBuscar" placeholder="Buscar estudiante por nombre o correo..." style="width: 60%; padding:6px;">
+        <button id="btnBuscar" class="button small">Buscar</button>
+      </div>
+
+      <!-- Tabla de estudiantes -->
+      <div id="tablaUsuarios" style="display:none;">
+        <h3>Lista de estudiantes registrados</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody id="usuariosBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Tabla Top 5 -->
+      <div id="tablaTop5" style="display:none;">
+        <h3>🏆 Top 5 Estudiantes con mejor puntaje</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Posición</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Promedio</th>
+            </tr>
+          </thead>
+          <tbody id="top5Body"></tbody>
+        </table>
+      </div>
+
+      <!-- Tabla de prácticas -->
+      <div id="tablaPracticas" style="display:none;">
+        <h3>Prácticas de pronunciación</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Usuario (email)</th>
+              <th>Tema</th>
+              <th>Frase</th>
+              <th>Puntaje</th>
+              <th>Feedback</th>
+              <th>Audio</th>
+            </tr>
+          </thead>
+          <tbody id="practicasBody"></tbody>
+        </table>
+      </div>
+
+      <!-- =================== PERFIL DOCENTE =================== -->
+      <section id="perfilDocente" style="margin-top:20px;">
+        <h3>Perfil del docente</h3>
+        <div>
+          <label for="perfilUsername">Nombre de usuario:</label>
+          <input type="text" id="perfilUsername" placeholder="Nuevo nombre de usuario" />
+          <button id="btnActualizarPerfil" class="button small">Actualizar perfil</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const authSection = document.getElementById("authSection");
+    const panelSection = document.getElementById("panelSection");
+
+    const btnLoginDocente = document.getElementById("btnLoginDocente");
+    const btnRegisterDocente = document.getElementById("btnRegisterDocente");
+
+    const btnCargarUsuarios = document.getElementById("btnCargarUsuarios");
+    const btnCargarPracticas = document.getElementById("btnCargarPracticas");
+    const btnTop5 = document.getElementById("btnTop5");
+    const btnBuscar = document.getElementById("btnBuscar");
+
+    const inputBuscar = document.getElementById("inputBuscar");
+
+    const usuariosBody = document.getElementById("usuariosBody");
+    const practicasBody = document.getElementById("practicasBody");
+    const top5Body = document.getElementById("top5Body");
+
+    const tablaUsuarios = document.getElementById("tablaUsuarios");
+    const tablaPracticas = document.getElementById("tablaPracticas");
+    const tablaTop5 = document.getElementById("tablaTop5");
+
+    const docenteId = 1;
+
+    const perfilUsername = document.getElementById("perfilUsername");
+    const btnActualizarPerfil = document.getElementById("btnActualizarPerfil");
+
+    // =========================
+    // Registro / Login docente
+    // =========================
+    btnRegisterDocente.onclick = async () => {
+      const nombre = document.getElementById("registerNombre").value.trim();
+      const email = document.getElementById("registerEmail").value.trim();
+      const password = document.getElementById("registerPassword").value.trim();
+      if (!nombre || !email || !password) return showAlert("Completa todos los campos", "error");
+
+      try {
+        await postData("/docentes/registro", { username: nombre, email, password });
+        showAlert("Docente registrado ✅", "success");
+      } catch (err) {
+        console.error(err);
+        showAlert("Error al registrar docente", "error");
+      }
+    };
+
+    btnLoginDocente.onclick = async () => {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      if (!email || !password) return showAlert("Completa todos los campos", "error");
+
+      try {
+        await postData("/docentes/login", { email, password });
+        showAlert("Login exitoso ✅", "success");
+        saveSession("docente", email);
+        authSection.style.display = "none";
+        panelSection.style.display = "block";
+
+        getData(`/docentes/${encodeURIComponent(email)}/perfil`)
+          .then(docente => { perfilUsername.value = docente.username || ""; })
+          .catch(err => console.error("Error al cargar perfil:", err));
+      } catch (err) {
+        console.error(err);
+        showAlert("Error al iniciar sesión", "error");
+      }
+    };
+
+    // =========================
+    // Cargar estudiantes
+    // =========================
+    btnCargarUsuarios.onclick = async () => {
+      try {
+        const data = await getData(`/docentes/${docenteId}/estudiantes`);
+        usuariosBody.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) {
+          usuariosBody.innerHTML = `<tr><td colspan="2" class="small">No hay estudiantes registrados</td></tr>`;
+        } else {
+          data.forEach(u => {
+            usuariosBody.innerHTML += `<tr><td>${u.username || ""}</td><td>${u.email || ""}</td></tr>`;
+          });
+        }
+        tablaUsuarios.style.display = "block";
+        tablaPracticas.style.display = "none";
+        tablaTop5.style.display = "none";
+        showAlert("Lista de estudiantes cargada ✅", "success");
+      } catch (err) { console.error(err); showAlert("Error al cargar estudiantes", "error"); }
+    };
+
+    // =========================
+    // Top 5 estudiantes
+    // =========================
+    btnTop5.onclick = async () => {
+      try {
+        const data = await getData(`/docentes/${docenteId}/top-5-estudiantes`);
+        top5Body.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) {
+          top5Body.innerHTML = `<tr><td colspan="4" class="small">No hay datos de estudiantes</td></tr>`;
+        } else {
+          data.forEach((u,i) => {
+            top5Body.innerHTML += `<tr>
+              <td>#${i+1}</td>
+              <td>${u.username || ""}</td>
+              <td>${u.email || ""}</td>
+              <td>${u.puntaje_promedio !== undefined ? u.puntaje_promedio.toFixed(2) + "%" : "0%"}</td>
+            </tr>`;
+          });
+        }
+        tablaTop5.style.display = "block";
+        tablaUsuarios.style.display = "none";
+        tablaPracticas.style.display = "none";
+        showAlert("Top 5 estudiantes cargado ✅", "success");
+      } catch (err) { console.error(err); showAlert("Error al cargar Top 5", "error"); }
+    };
+
+    // =========================
+    // Cargar todas las prácticas
+    // =========================
+    btnCargarPracticas.onclick = async () => {
+      try {
+        showAlert("Cargando prácticas, espere...", "info");
+        const usuarios = await getData("/usuarios");
+        practicasBody.innerHTML = "";
+        if (!Array.isArray(usuarios) || usuarios.length === 0) {
+          practicasBody.innerHTML = `<tr><td colspan="6" class="small">No hay prácticas disponibles</td></tr>`;
+          tablaPracticas.style.display = "block";
+          tablaUsuarios.style.display = "none";
+          tablaTop5.style.display = "none";
+          return showAlert("No se encontraron usuarios", "error");
+        }
+
+        const historialPromises = usuarios.map(u =>
+          getData(`/usuarios/${encodeURIComponent(u.email)}/historial`)
+            .then(hist => ({ email: u.email, hist }))
+            .catch(err => { console.error(err); return { email: u.email, hist: [] }; })
+        );
+
+        const resultados = await Promise.all(historialPromises);
+        let filasAgregadas = 0;
+
+        resultados.forEach(block => {
+          block.hist.forEach(entry => {
+            filasAgregadas++;
+            practicasBody.innerHTML += `<tr>
+              <td>${block.email}</td>
+              <td>${entry.tema || ""}</td>
+              <td>${entry.frase || ""}</td>
+              <td>${entry.puntaje !== undefined ? entry.puntaje : ""}</td>
+              <td>${entry.feedback || ""}</td>
+              <td>${entry.audio_url ? `<audio controls src="${API_URL}${entry.audio_url}"></audio>` : "—"}</td>
+            </tr>`;
+          });
+        });
+
+        if (filasAgregadas === 0) practicasBody.innerHTML = `<tr><td colspan="6" class="small">No se encontraron prácticas</td></tr>`;
+        tablaPracticas.style.display = "block";
+        tablaUsuarios.style.display = "none";
+        tablaTop5.style.display = "none";
+        showAlert("Prácticas cargadas ✅", "success");
+      } catch (err) { console.error(err); showAlert("Error al cargar prácticas", "error"); }
+    };
+
+    // =========================
+    // Buscar estudiantes y mostrar todas sus prácticas
+    // =========================
+    btnBuscar.onclick = async () => {
+      const query = inputBuscar.value.trim();
+      if (!query) return showAlert("Escribe un nombre o correo para buscar", "error");
+
+      try {
+        const estudiantes = await getData(`/docentes/${docenteId}/buscar-estudiante?query=${encodeURIComponent(query)}`);
+        usuariosBody.innerHTML = "";
+        practicasBody.innerHTML = "";
+
+        if (!Array.isArray(estudiantes) || estudiantes.length === 0) {
+          usuariosBody.innerHTML = `<tr><td colspan="2" class="small">No se encontraron resultados</td></tr>`;
+          practicasBody.innerHTML = `<tr><td colspan="6" class="small">No se encontraron prácticas</td></tr>`;
+          tablaUsuarios.style.display = "none";
+          tablaPracticas.style.display = "none";
+          tablaTop5.style.display = "none";
+          return showAlert("No se encontraron estudiantes", "error");
+        }
+
+        // Mostrar estudiantes
+        estudiantes.forEach(u => {
+          usuariosBody.innerHTML += `<tr><td>${u.username || ""}</td><td>${u.email || ""}</td></tr>`;
+        });
+        tablaUsuarios.style.display = "block";
+
+        // Traer y mostrar prácticas de todos los estudiantes encontrados
+        const practicasPromises = estudiantes.map(u =>
+          getData(`/usuarios/${encodeURIComponent(u.email)}/historial`)
+            .then(hist => ({ email: u.email, hist }))
+            .catch(err => { console.error(err); return { email: u.email, hist: [] }; })
+        );
+
+        const practicasResult = await Promise.all(practicasPromises);
+        let filasAgregadas = 0;
+        practicasResult.forEach(block => {
+          block.hist.forEach(entry => {
+            filasAgregadas++;
+            practicasBody.innerHTML += `<tr>
+              <td>${block.email}</td>
+              <td>${entry.tema || ""}</td>
+              <td>${entry.frase || ""}</td>
+              <td>${entry.puntaje !== undefined ? entry.puntaje : ""}</td>
+              <td>${entry.feedback || ""}</td>
+              <td>${entry.audio_url ? `<audio controls src="${API_URL}${entry.audio_url}"></audio>` : "—"}</td>
+            </tr>`;
+          });
+        });
+
+        if (filasAgregadas === 0) practicasBody.innerHTML = `<tr><td colspan="6" class="small">No se encontraron prácticas</td></tr>`;
+
+        tablaPracticas.style.display = "block";
+        tablaTop5.style.display = "none";
+        showAlert("Búsqueda completada ✅", "success");
+
+      } catch (err) { console.error(err); showAlert("Error al buscar estudiantes/prácticas", "error"); }
+    };
+
+    // =========================
+    // Actualizar perfil docente
+    // =========================
+    btnActualizarPerfil.onclick = async () => {
+      const newUsername = perfilUsername.value.trim();
+      if (!newUsername) return showAlert("Escribe un nuevo nombre de usuario", "error");
+
+      try {
+        const { email } = getSession();
+        if (!email) return showAlert("Debes iniciar sesión primero", "error");
+
+        const updatedDocente = await putData(`/docentes/${encodeURIComponent(email)}/perfil`, { username: newUsername });
+        showAlert("Perfil actualizado ✅", "success");
+        perfilUsername.value = updatedDocente.username;
+      } catch (err) { console.error(err); showAlert("Error al actualizar perfil", "error"); }
+    };
+  </script>
+</body>
+</html>

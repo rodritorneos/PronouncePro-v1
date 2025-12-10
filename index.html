@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio | Plataforma de Pronunciación</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Plataforma de Pronunciación en Inglés</h1>
+  </header>
+
+  <main>
+    <div class="container center">
+      <h2>Bienvenido</h2>
+      <p>Selecciona tu tipo de usuario para continuar:</p>
+
+      <div class="row center" style="justify-content:center; margin-top:20px;">
+        <div class="card col" style="max-width:280px;">
+          <h3>Estudiante</h3>
+          <p class="small">Practica pronunciación, graba tu voz y recibe retroalimentación instantánea.</p>
+          <button class="button" onclick="location.href='usuarios.html'">Entrar como Estudiante</button>
+        </div>
+
+        <div class="card col" style="max-width:280px;">
+          <h3>Docente</h3>
+          <p class="small">Accede al panel para gestionar estudiantes y revisar resultados.</p>
+          <button class="button" onclick="location.href='docentes.html'">Entrar como Docente</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p class="small">© 2025 - CCJ Callao</p>
+  </footer>
+
+  <!-- JS general (lo agregamos aunque aún no hace nada) -->
+  <script src="app.js"></script>
+</body>
+</html>

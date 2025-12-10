@@ -1,0 +1,148 @@
+/* ============================
+   styles.css — Estilos globales
+   ============================ */
+
+/* --- Reset / base --- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f4f7fb;
+  color: #223;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
+}
+
+/* --- Layout principal --- */
+header, footer {
+  background: linear-gradient(90deg, #0b57a6, #0066d6);
+  color: #fff;
+  padding: 14px 20px;
+  text-align: center;
+}
+.container {
+  width: 92%;
+  max-width: 980px;
+  margin: 28px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(18, 38, 63, 0.06);
+}
+
+/* --- Tipografía y títulos --- */
+h1 { margin: 0 0 6px; font-size: 1.6rem; }
+h2 { margin: 8px 0 14px; color: #0b57a6; }
+
+/* --- Formularios / inputs --- */
+.form-row { margin-bottom: 12px; display: flex; flex-direction: column; }
+label { font-size: 0.95rem; margin-bottom: 6px; color: #334; }
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d7dbe5;
+  font-size: 0.95rem;
+  width: 100%;
+  background: #fff;
+}
+textarea { min-height: 100px; resize: vertical; }
+
+/* --- Botones --- */
+.button {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #0b57a6;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.button.secondary {
+  background: #f1f5f9;
+  color: #0b57a6;
+  border: 1px solid #d7e3fb;
+}
+.button:active { transform: translateY(1px); }
+
+/* --- Mensajes / alertas --- */
+#alertBox { margin-bottom: 12px; min-height: 36px; }
+.alert { padding: 10px 12px; border-radius: 8px; }
+.alert.success { background: #e6fbef; color: #0b6b39; }
+.alert.error   { background: #ffe6e6; color: #b32b2b; }
+.alert.info    { background: #eef6ff; color: #0b57a6; }
+
+/* --- Controles de audio / grabación --- */
+.audio-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.btn-record {
+  background: linear-gradient(180deg,#ff5252,#ff2f2f);
+  color: white;
+  border-radius: 50%;
+  width: 58px;
+  height: 58px;
+  display: inline-grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.btn-stop { background: #f1f5f9; color: #c62828; border-radius: 8px; padding: 8px 12px; }
+.audio-player { margin-left: 8px; }
+
+/* --- Tarjetas pequeñas --- */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #eef2f8;
+  box-shadow: 0 2px 8px rgba(9,30,66,0.03);
+  margin-bottom: 12px;
+}
+
+/* --- Grid / columnas --- */
+.row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.col {
+  flex: 1;
+  min-width: 220px;
+}
+
+/* --- Tablas / lista simple --- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table tr:nth-child(even) { background: #fbfcff; }
+.table th, .table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #f0f2f7;
+}
+
+/* --- Pequeños utilitarios --- */
+.small { font-size: 0.85rem; color: #556; }
+.center { text-align: center; }
+.right { text-align: right; }
+.mb-8 { margin-bottom: 8px; }
+.mt-12 { margin-top: 12px; }
+
+/* --- Responsive (básico) --- */
+@media (max-width: 640px) {
+  .container { padding: 16px; margin: 14px; }
+  .row { flex-direction: column; }
+  .btn-record { width: 48px; height: 48px; }
+}
