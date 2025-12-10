@@ -2,7 +2,7 @@
    app.js — Funciones globales del frontend
    =========================================== */
 
-const API_URL = "https://surprising-antonio-gossip-des.trycloudflare.com"; // Cambia si tu backend usa otro puerto
+const API_URL = "http://localhost:8000"; // Cambia si tu backend usa otro puerto
 
 // ===========================================
 // === FUNCIONES GENERALES PARA EL FRONTEND ===
