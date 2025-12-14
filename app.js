@@ -2,7 +2,7 @@
    app.js — Funciones globales del frontend
    =========================================== */
 
-const API_URL = "https://instrumentation-conferences-pleased-smoking.trycloudflare.com"; // Cambia si tu backend usa otro puerto
+const API_URL = "https://blogs-significantly-beatles-domains.trycloudflare.com"; // Cambia si tu backend usa otro puerto
 
 // ===========================================
 // === FUNCIONES GENERALES PARA EL FRONTEND ===
